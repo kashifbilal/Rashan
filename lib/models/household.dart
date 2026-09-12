@@ -1,9 +1,9 @@
 /// Represents one surveyed household.
 ///
-/// This is Step 1 of the survey: identification and household composition.
-/// Later steps will add more fields to this model (GPS location, livelihood
-/// options, photos, computed eligibility score, delivery status, etc.) —
-/// each new section of the SOP survey gets its own batch of fields here.
+/// Section 1 (identification & composition) plus, as of this update,
+/// GPS coordinates captured at survey time and a photo of the household /
+/// head of household. Later steps will add livelihood questions, the
+/// eligibility score, and delivery-confirmation fields.
 class Household {
   final int? id; // null until saved to the database, then auto-assigned
   final String surveyorName;
@@ -16,6 +16,9 @@ class Household {
   final int childrenUnder18;
   final int elderlyOver60;
   final String? notes;
+  final double? latitude;
+  final double? longitude;
+  final String? photoPath; // local file path to the captured photo
 
   Household({
     this.id,
@@ -29,6 +32,9 @@ class Household {
     required this.childrenUnder18,
     required this.elderlyOver60,
     this.notes,
+    this.latitude,
+    this.longitude,
+    this.photoPath,
   });
 
   /// Converts this object into a Map for storage in SQLite.
@@ -45,6 +51,9 @@ class Household {
       'childrenUnder18': childrenUnder18,
       'elderlyOver60': elderlyOver60,
       'notes': notes,
+      'latitude': latitude,
+      'longitude': longitude,
+      'photoPath': photoPath,
     };
   }
 
@@ -62,6 +71,9 @@ class Household {
       childrenUnder18: map['childrenUnder18'] as int,
       elderlyOver60: map['elderlyOver60'] as int,
       notes: map['notes'] as String?,
+      latitude: map['latitude'] as double?,
+      longitude: map['longitude'] as double?,
+      photoPath: map['photoPath'] as String?,
     );
   }
 }

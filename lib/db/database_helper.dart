@@ -14,6 +14,10 @@ class DatabaseHelper {
 
   static Database? _database;
 
+  // Bump this whenever the table structure changes, and add the matching
+  // migration step in _onUpgrade so existing installs don't lose data.
+  static const int _dbVersion = 2;
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
@@ -26,8 +30,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: _dbVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -44,9 +49,20 @@ class DatabaseHelper {
         totalFamilyMembers INTEGER NOT NULL,
         childrenUnder18 INTEGER NOT NULL,
         elderlyOver60 INTEGER NOT NULL,
-        notes TEXT
+        notes TEXT,
+        latitude REAL,
+        longitude REAL,
+        photoPath TEXT
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE households ADD COLUMN latitude REAL');
+      await db.execute('ALTER TABLE households ADD COLUMN longitude REAL');
+      await db.execute('ALTER TABLE households ADD COLUMN photoPath TEXT');
+    }
   }
 
   Future<int> insertHousehold(Household household) async {

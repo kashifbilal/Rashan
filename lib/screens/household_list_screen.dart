@@ -1,11 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../db/database_helper.dart';
 import '../models/household.dart';
 import 'survey_screen.dart';
 
 /// The app's home screen: shows every household surveyed so far, and lets
-/// you start a new survey. This is the screen you'll land on when you open
-/// the app.
+/// you start a new survey. This is the screen you land on after unlocking
+/// the app with your PIN.
 class HouseholdListScreen extends StatefulWidget {
   const HouseholdListScreen({super.key});
 
@@ -44,17 +45,31 @@ class _HouseholdListScreenState extends State<HouseholdListScreen> {
                   itemCount: _households.length,
                   itemBuilder: (context, index) {
                     final h = _households[index];
+                    final hasPhoto =
+                        h.photoPath != null && File(h.photoPath!).existsSync();
                     return Card(
-                      margin:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       child: ListTile(
+                        leading: hasPhoto
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.file(
+                                  File(h.photoPath!),
+                                  width: 48,
+                                  height: 48,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(h.headOfHouseholdName),
                         subtitle: Text(
                           'CNIC: ${h.cnic}\n'
                           'Family size: ${h.totalFamilyMembers} '
                           '(Children: ${h.childrenUnder18}, Elderly: ${h.elderlyOver60})\n'
                           'Surveyed by ${h.surveyorName} on '
-                          '${h.surveyDate.day}/${h.surveyDate.month}/${h.surveyDate.year}',
+                          '${h.surveyDate.day}/${h.surveyDate.month}/${h.surveyDate.year}'
+                          '${h.latitude != null ? '\nLocation captured' : '\nNo location captured'}',
                         ),
                         isThreeLine: true,
                       ),

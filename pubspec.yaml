@@ -1,0 +1,26 @@
+name: rashan_app
+description: "Household survey and rashan (ration) distribution app."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.3.0     # on-device SQLite database (works fully offline in the field)
+  path: ^1.8.3        # helper for building the database file path
+  geolocator: any     # GPS location capture
+  image_picker: any   # camera photo capture
+  path_provider: any  # finding a permanent folder to store captured photos
+  shared_preferences: any  # storing the PIN lock's hash on-device
+  crypto: any         # hashing the PIN so it's never stored as plain text
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

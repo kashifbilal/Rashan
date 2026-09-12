@@ -1,42 +1,58 @@
-# Rashan Survey App — Step 1: Household Survey
+# Rashan Survey App — Household Survey + GPS + Camera + PIN Lock
 
 ## What's in this step
 
 A working Flutter app with:
-- A home screen listing every household surveyed so far (empty at first).
-- A "New Survey" form covering **Section 1: Identification & Composition**
-  (surveyor name, head of household, CNIC, phone, address, family size,
-  children under 18, elderly 60+, notes).
+- A PIN lock on app startup (first launch: set a 4-6 digit PIN; every launch
+  after that: enter it to get in). The PIN is stored as a SHA-256 hash, never
+  as plain text. This is a real protection against casual access if a phone
+  is lost or picked up — it is **not** full database encryption yet (the
+  SQLite file itself isn't encrypted). That, plus individual surveyor
+  logins, is a good next step once we build cloud sync.
+- A home screen listing every household surveyed so far, with a photo
+  thumbnail and GPS status per entry.
+- A "New Survey" form covering:
+  - **Section 1: Identification & Composition** (surveyor name, head of
+    household, CNIC, phone, address, family size, children under 18,
+    elderly 60+, notes).
+  - **Section 2: Location & Photo** — a real GPS capture button (using the
+    phone's actual location hardware, with proper permission handling) and
+    a real camera capture button that saves the photo permanently on-device.
 - Form validation (required fields, valid 13-digit CNIC).
-- A duplicate-CNIC check that warns you if a household has already been
-  surveyed, before saving.
+- A duplicate-CNIC check that warns you before saving a second entry for
+  the same household.
 - Everything is saved **locally on the device** in a SQLite database, so it
   works fully offline in the field. No server, no account, no subscription
   needed for this step.
 
-## What's next (future steps — just ask, one at a time)
+## What's next (future steps — just ask, one at a time or in a batch)
 
-- Section 2: GPS location capture (for delivery-route clustering).
-- Section 3: Livelihood questions (income sources, skills, existing assets).
-- Photo capture of the household / ID card, and the voice-interview recording.
+- Livelihood questions (income sources, skills, existing assets).
+- Voice-interview recording.
 - The auto + manual scoring engine (score out of 100).
-- The delivery-confirmation screen (photo, GPS, timestamp captured invisibly;
-  signature/thumbprint).
+- The delivery-confirmation screen (photo, GPS, timestamp captured
+  invisibly; signature/thumbprint).
+- Full database encryption at rest, and individual surveyor accounts once
+  we add server sync.
 - Syncing the local database to a shared server so multiple surveyors' and
-  the executive committee's phones stay in sync (this is the only piece that
-  will eventually need *some* backend — we'll use a free tier, no subscription,
-  when we get there).
+  the executive committee's phones stay in sync.
 
 ## Project structure
 
 ```
 rashan_app/
   pubspec.yaml
+  codemagic.yaml                        # Codemagic build config (Android only)
+  .github/workflows/build.yml           # GitHub Actions build config (Android only)
+  android/                              # native Android project (Gradle, manifest, icons)
   lib/
-    main.dart                       # app entry point
-    models/household.dart           # the Household data model
-    db/database_helper.dart         # SQLite read/write logic
-    screens/survey_screen.dart      # the survey form
+    main.dart                           # app entry point + PIN-lock startup gate
+    models/household.dart               # the Household data model
+    db/database_helper.dart             # SQLite read/write logic + schema migrations
+    services/auth_service.dart          # PIN hashing/storage/verification
+    screens/pin_setup_screen.dart       # first-run: choose a PIN
+    screens/pin_entry_screen.dart       # every other run: enter the PIN
+    screens/survey_screen.dart          # the survey form (with GPS + camera)
     screens/household_list_screen.dart  # home screen / list of households
 ```
 
